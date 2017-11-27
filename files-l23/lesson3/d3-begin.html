@@ -1,42 +1,86 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <head>
+  <link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet">
 <style>
 body {
   font: 16px sans-serif;
+}
+rect:hover {
+    fill: #FFA623;  /* fill with a yellow */
+}
+#tooltip {
+  position: absolute;
+    padding: 5px 10px;
+    background: white;
+    font-family: dosis;   /* we need to import this font*/
+    font-weight: bold;
+    box-shadow: 2px 2px 5px #000000;
+    color: #3498DB;
+}
+.hidden {
+  display:none;
 }
 </style>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 
 </head>
 <body>
-     
+
 </body>
 <script>
 //place you D3 code here
 var svgWidth = 700,
     svgHeight = 500;
- 
+
 var spacing= 2;
 
-var myData = [ 10, 15, 20, 30, 45, 50, 40, 45 ,50 , 40 ];
-			  			
+var myData = [ 10, 15, 20, 42, 35, 30, 25, 20, 15];
+myData.sort();
+
+//add a tooltop
+var tooltip = d3.select("body")
+              .append("div")
+              .attr("id", "tooltip")
+              .classed("hidden",  true);
+
+//create a linear scale using method chaining:
+var catScale = d3.scale.linear()
+               .domain([0,d3.max(myData)])
+               .range([0,400]);
+
+var colorScale = d3.scale.linear()
+                 .domain([0,d3.max(myData)])
+                 .range(["blue","red"]);
+
 var svg = d3.select("body")
 			.append("svg")
             .attr("width",svgWidth)
             .attr("height",svgHeight)
             .attr("style","background-color:#ddd"); /* added some style*/
-  		
+
 svg.selectAll("rect")
    .data(myData)
    .enter()
-   .append("rect")  
-   .attr("x", function(d, i) {return i * (svgWidth / myData.length);})  
-   .attr("y", function(d){return svgHeight - d;}) 
+   .append("rect")
+   .attr("x", function(d, i) {return i * (svgWidth / myData.length);})
+   .attr("y", function(d){return svgHeight - catScale(d);}) //Flip the chart
    .attr("width", (svgWidth / myData.length) - spacing)
-   .attr("height", function(d){return d})
-   .attr("fill", "blue");
-              
+   .attr("height", function(d){return catScale(d)})
+   .attr("fill", function(d){return(colorScale(d));})
+   //append a SVG title element which is rendered in a tooltop
+   .on("mouseover", function(d){
+     d3.select('#tooltip')
+     .style("left", d3.event.pageX + "px")
+     .style("top", d3.event.pageY -50 + "px")
+     .classed("hidden", false);
+    tooltip.html(d);        /* using tooltip the variable here*/
+})
+.on("mouseout", function(d) {
+  d3.select("#tooltip")
+  .classed("hidden", true);
+});
+
 </script>
 <!-- <script src="js/script.js"></script> -->
 </html>
