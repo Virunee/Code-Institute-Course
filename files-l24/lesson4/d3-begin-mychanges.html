@@ -20,6 +20,17 @@ rect:hover {
     display: none;
 }
 
+.axis text{
+   font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
 </style>
 <script src="https://d3js.org/d3.v3.min.js"></script>
 
@@ -40,6 +51,11 @@ myData.sort();
 var heightScale = d3.scale.linear()
                     .domain([0,d3.max(myData, function(d) {return d;})])
                     .range([0,svgHeight]);
+
+var yAxisScale = d3.scale.linear()
+                 .domain([0, d3.max(myData, function(d) {return d;})])
+                 .range([svgHeight,0]);
+
 var colorScale = d3.scale.linear()
                    .domain([0,d3.max(myData, function(d) {return d;})])
                    .range(["blue","red"]);
@@ -49,11 +65,22 @@ var tooltip = d3.select("body")
 				 .classed("hidden",true)
                  .attr("id","tooltip");
 
+// Set up axis
+
+var yAxis = d3.svg.axis() //creates axis
+            .scale(yAxisScale) //gives it a scale (equal to our heightScale currently)
+            .orient("left") //gives the axis an orientation with respect to the axis line
+            .ticks(5); //indicates the number of values to be displayed
+
 var svg = d3.select("body")
 			.append("svg")
             .attr("width",svgWidth)
             .attr("height",svgHeight)
-            .attr("style","background-color:#ddd"); /* added some style*/
+            .attr("style","background-color:#ddd") /* added some style*/
+            .append("g")
+            .attr("transform", "translate(35,0)")
+            .attr("class","axis")  // style axis via CSS
+            .call(yAxis);
 
 svg.selectAll("rect")
    .data(myData)
