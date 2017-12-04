@@ -52,7 +52,10 @@
 
     data.forEach(function(d) {
     	d.date = parseDate(d.date);
-    	d.total= d.http_404+d.http_200+d.http_302;
+    	d.http_404= d.http_404;
+      d.http_200= d.http_200;
+      d.http_302= d.http_302;
+      d.total= d.http_404+d.http_200+d.http_302;
       d.Year = d.date.getFullYear();
     });
 
@@ -78,12 +81,14 @@ var status_404 = dateDim.group().reduceSum(function (d) {
 
     //set the charts dimensions (x/y axis) and range
     hitslineChart
-	.width(500).height(200)
-	.dimension(dateDim)
-	.group(hits)
-  .brushOn(false)
-  .yAxisLabel("Hits per day")
-	.x(d3.time.scale().domain([minDate,maxDate]));
+   .width(500).height(200)
+   .dimension(dateDim)
+   .group(status_200, "200")
+   .stack(status_302, "302")
+   .stack(status_404, "404")
+   .brushOn(false)
+   .x(d3.time.scale().domain([minDate, maxDate]))
+   .yAxisLabel("Hits per day");
 
   var yearDim  = ndx.dimension(function(d) {return +d.Year;});
   var year_total = yearDim.group().reduceSum(function(d) {return d.total;});
