@@ -18,6 +18,19 @@
 
     <div id="chart-ring-year"></div>
     <div id="chart-line-hitsperday"></div>
+    <div style='clear:both;'>
+     <table id="dc-data-table">
+          <thead>
+               <tr class="header">
+                    <th>HTTP Response Date</th>
+                    <th>HTTP Response 200</th>
+                    <th>HTTP Response 302</th>
+                    <th>HTTP Response 404</th>
+                    <th>HTTP Response Total</th>
+               </tr>
+          </thead>
+     </table>
+</div>
 
         <!-- some data to work with -->
         <script>
@@ -93,7 +106,9 @@ var status_404 = dateDim.group().reduceSum(function (d) {
    .stack(status_302, "302")
    .stack(status_404, "404")
    .brushOn(false)
+   .renderArea(true) //fills the area under the line
    .x(d3.time.scale().domain([minDate, maxDate]))
+   .legend(dc.legend().x(450).y(10).itemHeight(13).gap(5)) //adds legend
    .yAxisLabel("Hits per day");
 
   var yearDim  = ndx.dimension(function(d) {return +d.Year;});
@@ -108,6 +123,34 @@ var status_404 = dateDim.group().reduceSum(function (d) {
    .innerRadius(50)
    .dimension(yearDim)
    .group(year_total);
+
+ //Add data table
+
+ var datatable = dc.dataTable("#dc-data-table"); //bind DOM element
+
+ datatable
+   .dimension(dateDim)
+   .group(function (d) {
+       return d.Year;
+   })
+   // create the columns dynamically
+   .columns([
+       function (d) {
+           return d.date.getDate() + "/" + (d.date.getMonth() + 1) + "/" + d.date.getFullYear();
+       },
+       function (d) {
+           return d.http_200;
+       },
+       function (d) {
+           return d.http_302;
+       },
+       function (d) {
+           return d.http_404;
+       },
+       function (d) {
+           return d.total;
+       }
+   ]);
 
   //tell dc to render the chart
   dc.renderAll();
